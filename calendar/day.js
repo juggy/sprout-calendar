@@ -1,5 +1,5 @@
 // ==========================================================================
-// Goar.CalendarView
+// SCal.CalendarDayView
 // ==========================================================================
 
 require('core');
@@ -12,10 +12,25 @@ require('core');
   @author AuthorName
   @version 0.1
 */
-Goar.CalendarView = SC.View.extend(
-/** @scope Goar.CalendarView.prototype */ {
+
+ONE_DAY = 1000*60*60*24; //in millisecond
+
+SCal.CalendarDayView = SC.View.extend(
+/** @scope SCal.CalendarDayView.prototype */ {
 
   emptyView: '<div class="calendar-day"></div>',
+
+	/*
+	Week day (0,1,2,3,4,5,6)
+	*/
+	weekDay: 0;
+	
+	/*
+	Enable or disable the day w/r to the clicks/select
+	*/
+	isEnabled: function(key, value){
+		
+	},
 	
 	content: function(key, value) {
     
@@ -23,16 +38,16 @@ Goar.CalendarView = SC.View.extend(
     if (value !== undefined) {
       if (this._content != value) {
         var date = this._content = _setDateOnDay(value) ;
-        var day = date.getDate();
-        el.innerHTML = day ;
+				date = date.setTime(date.getTime() + (this.get('weekDay') * ONE_DAY));
+        el.innerHTML = date.setTime().getDate();
 				
 				//check if today
-				this.setClassName('calendar-today', _setDateOnDay(new Date()) == date );
+				this.setClassName('today', _setDateOnDay(new Date()) == date );
       }
     }
 
     if (!this._content) {
-      this._content = new Date();
+      this._content = _setDateOnDay(new Date());
     }
     return this._content ;
   }.property(),
@@ -49,7 +64,5 @@ Goar.CalendarView = SC.View.extend(
 		date.setSeconds(0);
 		date.setMilliseconds(0);
 		return date;
-	},
-	
-	
+	}
 }) ;
