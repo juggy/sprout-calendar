@@ -13,17 +13,22 @@ require('core');
   @version 0.1
 */
 
-ONE_DAY = 1000*60*60*24; //in millisecond
+SCal.ONE_DAY = 86400000; //in millisecond
 
-SCal.CalendarDayView = SC.View.extend(
+SCal.CalendarDayView = SC.View.extend( SC.Control,
 /** @scope SCal.CalendarDayView.prototype */ {
 
-  emptyView: '<div class="calendar-day"></div>',
+  emptyElement: '<div class="calendar-day"></div>',
 
 	/*
 	Week day (0,1,2,3,4,5,6)
 	*/
-	weekDay: 0;
+	weekDay: 0,
+	
+	/*
+	The current month showing
+	*/
+	currentMonth: 1,
 	
 	/*
 	Enable or disable the day w/r to the clicks/select
@@ -37,28 +42,35 @@ SCal.CalendarDayView = SC.View.extend(
     // set the value of the label text.  Possibly localize and set innerHTML.
     if (value !== undefined) {
       if (this._content != value) {
-        var date = this._content = _setDateOnDay(value) ;
-				date = date.setTime(date.getTime() + (this.get('weekDay') * ONE_DAY));
-        el.innerHTML = date.setTime().getDate();
+        var date = this._content = this._setDateOnDay(value) ;
+				date.setTime(date.getTime() + (this.get('weekDay') * SCal.ONE_DAY));
+        this.set('innerHTML', date.getDate());
 				
 				//check if today
-				this.setClassName('today', _setDateOnDay(new Date()) == date );
+				this.setClassName('today', this._setDateOnDay(new Date()).getTime() == date.getTime() );
+				
+				//check if first day
+				this.setClassName('left-day', this.get('weekDay') == 0);
+				
+				this.setClassName('other-month', this.get('currentMonth') != date.getMonth());
       }
     }
 
     if (!this._content) {
-      this._content = _setDateOnDay(new Date());
+      this._content = this._setDateOnDay(new Date());
     }
     return this._content ;
   }.property(),
 	
 	//private
 	init: function(){
-		var day = content.getDate();
-		el.innerHTML = day;
+		if(content = this.get('content')){
+			var day = content.getDate();
+			this.set('innerHTML', day);
+		}
 	},
 	
-	_setDateOnDay: function(date){
+	_setDateOnDay: function( date ){
 		date.setHours(0);
 		date.setMinutes(0);
 		date.setSeconds(0);

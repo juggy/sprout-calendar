@@ -1,0 +1,21 @@
+.calendar-day{
+	background-color: white;
+	border-left: 1px solid #999;
+	padding: 2px;
+	margin:0px;
+	position:absolute;
+	text-align: center;
+	display:block;
+}
+
+.calendar-day.left-day{
+	border-left-width: 0px;
+}
+
+.calendar-day.today{
+	background-color: #FFE6FC;
+}
+
+.calendar-day.other-month{
+	color: #AAA;
+}

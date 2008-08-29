@@ -1,0 +1,15 @@
+.calendar-week{
+	padding:0px;
+	margin:0px;
+	position:absolute;
+	border-top: 1px solid #999;
+	display:block;
+}
+
+.calendar-week.top-week{
+	border-top-width: 0px
+}
+
+.calendar-week.standalone{
+	border: 1px solid #999;
+}

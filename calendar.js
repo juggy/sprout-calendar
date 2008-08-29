@@ -12,7 +12,7 @@ require('core');
   @author AuthorName
   @version 0.1
 */
-Goar.CalendarView = SC.View.extend(
+SCal.CalendarView = SC.View.extend(
 /** @scope Goar.CalendarView.prototype */ {
 
 	//Calendar property
