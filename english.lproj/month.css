@@ -1,4 +1,18 @@
 .calendar-month{
+	border: 1px solid #999;
+	background-color: #EEE;
+}
+
+.calendar-month-name{
+	position: absolute;
+	text-align: center;
+	font-size: 1.0em;
 	
 }
 
+.calendar-day-name{
+	position: absolute;
+	text-align: center;
+	font-size: 0.8em;
+	color: #BBB;
+}

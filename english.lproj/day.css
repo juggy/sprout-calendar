@@ -6,6 +6,7 @@
 	position:absolute;
 	text-align: center;
 	display:block;
+	font-size: 0.9em;
 }
 
 .calendar-day.left-day{
