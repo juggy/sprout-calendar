@@ -19,11 +19,6 @@ SCal.CalendarDayView = SC.View.extend( SC.Control,
 /** @scope SCal.CalendarDayView.prototype */ {
 
   emptyElement: '<div class="calendar-day"></div>',
-
-	/*
-	Week day (0,1,2,3,4,5,6)
-	*/
-	weekDay: 0,
 	
 	/*
 	The current month showing
@@ -43,14 +38,13 @@ SCal.CalendarDayView = SC.View.extend( SC.Control,
     if (value !== undefined) {
       if (this._content != value) {
         var date = this._content = this._setDateOnDay(value) ;
-				date.setTime(date.getTime() + (this.get('weekDay') * SCal.ONE_DAY));
         this.set('innerHTML', date.getDate());
 				
 				//check if today
 				this.setClassName('today', this._setDateOnDay(new Date()).getTime() == date.getTime() );
 				
 				//check if first day
-				this.setClassName('left-day', this.get('weekDay') == 0);
+				this.setClassName('left-day', date.getDay() == 0);
 				
 				this.setClassName('other-month', this.get('currentMonth') != date.getMonth());
       }

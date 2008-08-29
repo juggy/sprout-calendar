@@ -37,6 +37,7 @@ SCal.CalendarMonthView = SC.View.extend(
     if (value !== undefined) {
       if (this._content != value) {
         var date = this._content = value ;
+				this._needsReframe = true;
 				this._updateWeeks();
       }
     }
@@ -91,37 +92,45 @@ SCal.CalendarMonthView = SC.View.extend(
 	}.observes('daySize'),
 	
 	_updateWeeks : function() {
-		if( this._weekViewPool.length == 0 ){
-			var monthStart = this.get('monthStart');
-			var runningDate = new Date(monthStart);
-			
-			var view;
-			var weekView = this.get('weekView') ? this.get('weekView') : SCal.CalendarWeekView;
-			
-			for(var i = 0; true; i++){
-				view = weekView.create({owner: this, displayDelegate: this }) ;
-				
-				//check if we should continue building views
-				if(i == 0){
-					view._setDateOnWeekStart(runningDate);	
-				}else{
-					runningDate.setTime(runningDate.getTime() + (SCal.ONE_DAY * SCal.ONE_WEEK_DAYS));
-					if(runningDate.getMonth() != monthStart.getMonth()) 
-						break;
-				}
-				
-				this.appendChild(view);
-			
-				view.set('monthWeek', i);
-				view.set('daySize', this.get('daySize'));
-				view.set('content', new Date(monthStart));
-				
-				view.addObserver('content', this, 'monthStart');
-				view.addObserver('daySize', this, 'daySize');
-				
-				this._weekViewPool.push(view);
+		var monthStart = this.get('monthStart');
+		var runningDate = new Date(monthStart);
+		var checkDate = new Date(monthStart);
+		
+		var view;
+		var weekView = this.get('weekView') ? this.get('weekView') : SCal.CalendarWeekView;
+		
+		var i = 0;
+		while( true ){
+			view =  (this._weekViewPool.length > i) 
+								? this._weekViewPool[i]
+								: weekView.create({owner: this, displayDelegate: this });
+										
+			//check if we should continue building views
+			if(i == 0){
+				view._setDateOnWeekStart(checkDate);	
+			}else{
+				runningDate.setTime(checkDate.getTime() + (SCal.ONE_DAY * SCal.ONE_WEEK_DAYS));
+				checkDate.setTime(checkDate.getTime() + (SCal.ONE_DAY * SCal.ONE_WEEK_DAYS));
+				if(checkDate.getMonth() != monthStart.getMonth()) break;
 			}
+			
+			this.appendChild(view);
+		
+			view.set('monthWeek', i);
+			view.set('daySize', this.get('daySize'));
+			view.set('content', new Date(runningDate));
+			
+
+			if( this._weekViewPool.length == i) this._weekViewPool.push(view);
+			
+			i++;
 		}
+		
+		//remove unused weeks. (number of weeks in a month varies from 4 to 6)
+		while(i < this._weekViewPool.length){
+			view = this._weekViewPool.pop();
+			this.removeChild(view);
+		} 
 		
 		this.reframe();
 	}

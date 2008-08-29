@@ -39,11 +39,13 @@ SCal.CalendarWeekView = SC.View.extend(
     // set the value of the label text.  Possibly localize and set innerHTML.
     if (value !== undefined) {
       if (this._content != value) {
-        var date = this._content = value ;
-				this.set('currentMonth', date.getMonth());
+				
+				this.set('currentMonth', value.getMonth());
+				this._content = this._setDateOnWeekStart(value) ;
+				
 				this.setClassName('top-week', (this.get('monthWeek') == 0));
 				this.setClassName('standalone', (this.get('monthWeek') == -1));
-				
+				this._needsReframe = true;
 				this._updateDays();
       }
     }
@@ -56,21 +58,10 @@ SCal.CalendarWeekView = SC.View.extend(
 	/*
 	The current month showing
 	*/
-	currentMonth: function(){
-		return this.get('content').getMonth();
-	}.property('content'),
+	currentMonth: 0,
 	
 	weekStart : function(){
-		var firstDayOfWeek = this._setDateOnWeekStart(new Date(this.get('content')))
-		
-		var week = this.get('monthWeek');
-		if(week >= 0){
-			//using the week in a month view
-			//calculate the week to display
-			firstDayOfWeek.setTime(firstDayOfWeek.getTime() + (week * SCal.ONE_DAY * SCal.ONE_WEEK_DAYS));
-		}
-		
-		return firstDayOfWeek;
+		return this._setDateOnWeekStart(new Date(this.get('content')))
 		
 	}.property('content'),
 	
@@ -114,23 +105,19 @@ SCal.CalendarWeekView = SC.View.extend(
 	}.observes('daySize'),
 	
 	_updateDays : function() {
-		if( this._dayViewPool.length == 0 ){
-			var view;
-			var weekStart = this.get('weekStart');
-			var dayView = this.get('dayView') ? this.get('dayView') : SCal.CalendarDayView;
-			for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
-				view = dayView.create({owner: this, displayDelegate: this }) ;
-				this.appendChild(view);
-				
-				view.set('weekDay', i);
-				view.set('currentMonth', this.get('currentMonth'));
-				view.set('content', new Date(weekStart));
-				
-				view.addObserver('content', this, 'weekStart');
-				view.addObserver('currentMonth', this, 'currentMonth');
-				
-				this._dayViewPool.push(view);
-			}
+		var view;
+		var weekStart = this.get('weekStart');
+		var dayView = this.get('dayView') ? this.get('dayView') : SCal.CalendarDayView;
+		for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
+			view =  (this._dayViewPool.length > i) 
+								? this._dayViewPool[i]
+								: dayView.create({owner: this, displayDelegate: this });
+			this.appendChild(view);
+			
+			view.set('currentMonth', this.get('currentMonth'));
+			view.set('content', new Date(weekStart.getTime() + (i * SCal.ONE_DAY)));
+
+			if (this._dayViewPool.length == i) this._dayViewPool.push(view);
 		}
 		
 		this.reframe();
