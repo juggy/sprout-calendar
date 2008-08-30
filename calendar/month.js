@@ -106,7 +106,7 @@ SCal.CalendarMonthView = SC.View.extend( SC.Control,
 			week.viewFrameWillChange() ;
 			week.set('frame', f);
 			week.viewFrameDidChange() ;
-			
+			week.set('daySize', size);
 		}
 		//set week width/height
     this.viewFrameWillChange() ;
@@ -154,8 +154,6 @@ SCal.CalendarMonthView = SC.View.extend( SC.Control,
 			view.set('content', new Date(runningDate));
 			
 			if( this._weekViewPool.length == i){
-				this.addObserver("dayView", this, "dayView");
-				this.addObserver("daySize", this, "daySize");
 				this._weekViewPool.push(view);
 			}
 			i++;
