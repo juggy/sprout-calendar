@@ -3,7 +3,6 @@
 // ==========================================================================
 
 require('core');
-require('day');
 
 /** @class
 
@@ -16,7 +15,7 @@ require('day');
 
 SCal.ONE_MONTH_WEEKS = 5;
 
-SCal.CalendarMonthView = SC.View.extend(
+SCal.CalendarMonthView = SC.View.extend( SC.Control,
 /** @scope SCal.CalendarMonthView.prototype */ {
 
   emptyElement: '<div class="calendar-month"></div>',
@@ -35,33 +34,19 @@ SCal.CalendarMonthView = SC.View.extend(
 	Default view used for the week, much like exampleView in the ListView
 	*/
 	weekView: SCal.CalendarWeekView,
-
 	
-	content: function(key, value) {
-    
-    // set the value of the label text.  Possibly localize and set innerHTML.
-    if (value !== undefined) {
-      if (this._content != value) {
-        var date = this._content = value ;
-				this._needsReframe = true;
-				this._updateWeeks();
-      }
-    }
-    if (!this._content) {
-      this._content = this._setDateOnMonthStart(new Date());
-    }
-    return this._content ;
-  }.property(),
+	/*
+	Default view used for the day, much like exampleView in the ListView
+	*/
+	dayView: SCal.CalendarDayView,
 	
 	monthStart : function(){
 		return this._setDateOnMonthStart(new Date(this.get('content')));
 	}.property('content'),
 	
 	//private
-	
-	
 	init : function(){
-		
+		sc_super();
 		this._weekViewPool = [];
 		
 		this._monthNameView = SC.LabelView.create();
@@ -96,47 +81,43 @@ SCal.CalendarMonthView = SC.View.extend(
 	/*
 	Used to reframe when daySize changed
 	*/
-	_needsReframe: true,
 	reframe: function(){
-		if(this._needsReframe){
-			size = this.get('daySize');
-			headSize = this.get('headSize');
-			var f;
-			
-			//frame the header views
-			f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: this.headSize };
-			this._head.set('frame', f);
-			
-			f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: (headSize/2) };
-			this._monthNameView.set('frame', f);
-			
-			for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
-				f = {x:i * size, y: (headSize/2), width: size, height: (headSize/2)};
-				this._dayNameViews[i].set('frame', f);
-			}
-			
-			
-			for(i = 0; i < this._weekViewPool.length; i++){
-				//reframe the days
-				var week = this._weekViewPool[i];
-				f = { x: 1, y: headSize + size * i, width: size * SCal.ONE_WEEK_DAYS, height: size };
-				week.viewFrameWillChange() ;
-				week.set('frame', f);
-				week.viewFrameDidChange() ;
-				
-			}
-			//set week width/height
-	    this.viewFrameWillChange() ;
-
-			f = this.get('frame');
-			f.width = size * SCal.ONE_WEEK_DAYS + 2;
-			f.height = size * (this._weekViewPool.length) + headSize + 1;
-			this.set('frame', f);
+		size = this.get('daySize');
+		headSize = this.get('headSize');
+		var f;
 		
-			this.viewFrameDidChange() ;
+		//frame the header views
+		f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: this.headSize };
+		this._head.set('frame', f);
 		
-			this._needsReframe, false;
+		f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: (headSize/2) };
+		this._monthNameView.set('frame', f);
+		
+		for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
+			f = {x:i * size, y: (headSize/2), width: size, height: (headSize/2)};
+			this._dayNameViews[i].set('frame', f);
 		}
+		
+		
+		for(i = 0; i < this._weekViewPool.length; i++){
+			//reframe the days
+			var week = this._weekViewPool[i];
+			f = { x: 1, y: headSize + size * i, width: size * SCal.ONE_WEEK_DAYS, height: size };
+			week.viewFrameWillChange() ;
+			week.set('frame', f);
+			week.viewFrameDidChange() ;
+			
+		}
+		//set week width/height
+    this.viewFrameWillChange() ;
+
+		f = this.get('frame');
+		f.width = size * SCal.ONE_WEEK_DAYS + 2;
+		f.height = size * (this._weekViewPool.length) + headSize + 1;
+		this.set('frame', f);
+	
+		this.viewFrameDidChange() ;
+	
 	}.observes('daySize', 'headSize'),
 	
 	_updateWeeks : function() {
@@ -169,11 +150,14 @@ SCal.CalendarMonthView = SC.View.extend(
 		
 			view.set('monthWeek', i);
 			view.set('daySize', this.get('daySize'));
+			view.set('dayView', this.get('dayView'));
 			view.set('content', new Date(runningDate));
 			
-
-			if( this._weekViewPool.length == i) this._weekViewPool.push(view);
-			
+			if( this._weekViewPool.length == i){
+				this.addObserver("dayView", this, "dayView");
+				this.addObserver("daySize", this, "daySize");
+				this._weekViewPool.push(view);
+			}
 			i++;
 		}
 		
@@ -184,6 +168,6 @@ SCal.CalendarMonthView = SC.View.extend(
 		} 
 		
 		this.reframe();
-	}
+	}.observes('content')
 	
 }) ;

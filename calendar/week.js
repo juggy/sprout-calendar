@@ -3,7 +3,6 @@
 // ==========================================================================
 
 require('core');
-require('day');
 
 /** @class
 
@@ -17,7 +16,7 @@ require('day');
 SCal.ONE_WEEK_DAYS = 7;
 SCal.ONE_WEEK = SCal.ONE_DAY * SCal.ONE_WEEK_DAYS;
 
-SCal.CalendarWeekView = SC.View.extend(
+SCal.CalendarWeekView = SC.View.extend( SC.Control,
 /** @scope SCal.CalendarWeekView.prototype */ {
 
   emptyElement: '<div class="calendar-week"></div>',
@@ -33,42 +32,30 @@ SCal.CalendarWeekView = SC.View.extend(
 	dayView: SCal.CalendarDayView,
 	
 	monthWeek: -1,
-	
-	content: function(key, value) {
-    
-    // set the value of the label text.  Possibly localize and set innerHTML.
-    if (value !== undefined) {
-      if (this._content != value) {
-				
-				this.set('currentMonth', value.getMonth());
-				this._content = this._setDateOnWeekStart(value) ;
-				
-				this.setClassName('top-week', (this.get('monthWeek') == 0));
-				this.setClassName('standalone', (this.get('monthWeek') == -1));
-				this._needsReframe = true;
-				this._updateDays();
-      }
-    }
-    if (!this._content) {
-      this._content = this._setDateOnWeekStart(new Date());
-    }
-    return this._content ;
-  }.property(),
-	
 	/*
 	The current month showing
-	*/
-	currentMonth: 0,
+	*/	
+	currentMonth: function(){
+		return this.get('content').getMonth();
+	}.property('content'),
 	
 	weekStart : function(){
 		return this._setDateOnWeekStart(new Date(this.get('content')))
-		
 	}.property('content'),
 	
 	//private
 	init : function(){
+		sc_super();
 		this._dayViewPool= [];
 	},
+	
+	_topWeekObserver : function(){
+		this.setClassName('top-week', (this.get('monthWeek') == 0));
+	}.observes('monthWeek'),
+	
+	_standaloneObserver : function(){
+		this.setClassName('standalone', (this.get('monthWeek') == -1));
+	}.observes('monthWeek'),
 	
 	_setDateOnWeekStart: function(date){
 		date.setTime(date.getTime() - (date.getDay() * SCal.ONE_DAY));
@@ -77,31 +64,26 @@ SCal.CalendarWeekView = SC.View.extend(
 	/*
 	Used to reframe when daySize changed
 	*/
-	_needsReframe: true,
 	reframe: function(){
-		if(this._needsReframe){
-			size = this.get('daySize');
-			var f;
-			for(i = 0; i < this._dayViewPool.length; i++){
-				//reframe the days
-				var day = this._dayViewPool[i];
-				f = { x: size * i, y: 0, width: size, height: size };
-				day.viewFrameWillChange() ;
-				day.set('frame', f);
-				day.viewFrameDidChange() ;
-			}
-			//set week width/height
-	    this.viewFrameWillChange() ;
-
-			f = this.get('frame');
-			f.width = size * this._dayViewPool.length;
-			f.height = size;
-			this.set('frame', f);
-		
-			this.viewFrameDidChange() ;
-		
-			this._needsReframe, false;
+		size = this.get('daySize');
+		var f;
+		for(i = 0; i < this._dayViewPool.length; i++){
+			//reframe the days
+			var day = this._dayViewPool[i];
+			f = { x: size * i, y: 0, width: size, height: size };
+			day.viewFrameWillChange() ;
+			day.set('frame', f);
+			day.viewFrameDidChange() ;
 		}
+		//set week width/height
+    this.viewFrameWillChange() ;
+
+		f = this.get('frame');
+		f.width = size * this._dayViewPool.length;
+		f.height = size;
+		this.set('frame', f);
+	
+		this.viewFrameDidChange() ;
 	}.observes('daySize'),
 	
 	_updateDays : function() {
@@ -121,6 +103,6 @@ SCal.CalendarWeekView = SC.View.extend(
 		}
 		
 		this.reframe();
-	}
+	}.observes('content')
 	
 }) ;

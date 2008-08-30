@@ -25,44 +25,27 @@ SCal.CalendarDayView = SC.View.extend( SC.Control,
 	*/
 	currentMonth: 1,
 	
-	/*
-	Enable or disable the day w/r to the clicks/select
-	*/
-	isEnabled: function(key, value){
-		
-	},
-	
-	content: function(key, value) {
-    
-    // set the value of the label text.  Possibly localize and set innerHTML.
-    if (value !== undefined) {
-      if (this._content != value) {
-        var date = this._content = this._setDateOnDay(value) ;
-        this.set('innerHTML', date.getDate());
-				
-				//check if today
-				this.setClassName('today', this._setDateOnDay(new Date()).getTime() == date.getTime() );
-				
-				//check if first day
-				this.setClassName('left-day', date.getDay() == 0);
-				
-				this.setClassName('other-month', this.get('currentMonth') != date.getMonth());
-      }
-    }
-
-    if (!this._content) {
-      this._content = this._setDateOnDay(new Date());
-    }
-    return this._content ;
-  }.property(),
-	
 	//private
 	init: function(){
+		sc_super();
 		if(content = this.get('content')){
 			var day = content.getDate();
 			this.set('innerHTML', day);
 		}
 	},
+	
+	_todayObserver: function(){
+		var date = this._setDateOnDay(new Date(this.get('content')));
+		this.setClassName('today', this._setDateOnDay(new Date()).getTime() == date.getTime() );
+	}.observes('content'),
+	
+	_leftDayObserver: function(){
+		this.setClassName('left-day', this.get('content').getDay() == 0);
+	}.observes('content'),
+	
+	_otherMonthObserver: function(){
+		this.setClassName('other-month', this.get('currentMonth') != this.get('content').getMonth());
+	}.observes('content'),
 	
 	_setDateOnDay: function( date ){
 		date.setHours(0);
@@ -70,5 +53,10 @@ SCal.CalendarDayView = SC.View.extend( SC.Control,
 		date.setSeconds(0);
 		date.setMilliseconds(0);
 		return date;
-	}
+	},
+	
+	_render: function(){
+    this.set('innerHTML', this.get('content').getDate());
+	}.observes('content')
+	
 }) ;
