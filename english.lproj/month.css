@@ -1,13 +1,16 @@
 .calendar-month{
 	border: 1px solid #999;
-	background-color: #EEE;
+}
+
+.calendar-head{
+	background:  static_url('images/sc-theme-sprite.png') repeat-x left -1062px;
 }
 
 .calendar-month-name{
 	position: absolute;
 	text-align: center;
 	font-size: 1.0em;
-	
+	font-family: "Lucida Grande", sans-serif;
 }
 
 .calendar-day-name{

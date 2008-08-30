@@ -1,22 +1,27 @@
 .calendar-day{
-	background-color: white;
-	border-left: 1px solid #999;
 	padding: 2px;
 	margin:0px;
 	position:absolute;
 	text-align: center;
-	display:block;
 	font-size: 0.9em;
+	font-weight: bold;
+	font-family: "Lucida Grande", sans-serif;
+	background: static_url('images/day-background.png');
+	color: #444;
+	text-decoration: none;
 }
 
 .calendar-day.left-day{
-	border-left-width: 0px;
+	
 }
 
 .calendar-day.today{
-	background-color: #FFE6FC;
+	background: static_url('images/day-background.png') left -26px;
+	color: white;
 }
 
 .calendar-day.other-month{
+	font-weight: normal;
 	color: #AAA;
+	background: static_url('images/day-background.png') left -52px;
 }

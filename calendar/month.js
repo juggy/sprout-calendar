@@ -24,7 +24,12 @@ SCal.CalendarMonthView = SC.View.extend(
 	/*
 	Height and width of one day
 	*/
-	daySize: 20,
+	daySize: 26,
+	
+	/*
+	Height of the header of the month
+	*/
+	headSize: 36,
 	
 	/*
 	Default view used for the week, much like exampleView in the ListView
@@ -56,13 +61,19 @@ SCal.CalendarMonthView = SC.View.extend(
 	
 	
 	init : function(){
+		
 		this._weekViewPool = [];
+		
 		this._monthNameView = SC.LabelView.create();
 		this._dayNameViews = [];
+		this._head = SC.View.create();
+		
+		this._head.setClassName('calendar-head', true);
+		this.appendChild(this._head);
 		
 		//append month name view
 		this._monthNameView.setClassName('calendar-month-name', true);
-		this.appendChild(this._monthNameView);
+		this._head.appendChild(this._monthNameView);
 		
 		//create and append day name views
 		var date = new Date();
@@ -70,13 +81,12 @@ SCal.CalendarMonthView = SC.View.extend(
 		
 		for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
 			var view = SC.LabelView.create();
-			view.set('value', date.format("E").charAt(0));
+			view.set('value', date.format("E"));
 			view.setClassName('calendar-day-name', true);
 			this._dayNameViews.push(view);
-			this.appendChild(view);
+			this._head.appendChild(view);
 			date.setTime(date.getTime() + SCal.ONE_DAY);
 		}
-			
 	},
 	
 	_setDateOnMonthStart: function(date){
@@ -90,14 +100,18 @@ SCal.CalendarMonthView = SC.View.extend(
 	reframe: function(){
 		if(this._needsReframe){
 			size = this.get('daySize');
+			headSize = this.get('headSize');
 			var f;
 			
 			//frame the header views
-			f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: size };
+			f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: this.headSize };
+			this._head.set('frame', f);
+			
+			f = {x:0, y:0, width:size * SCal.ONE_WEEK_DAYS, height: (headSize/2) };
 			this._monthNameView.set('frame', f);
 			
 			for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
-				f = {x:i * size, y: size, width: size, height: size};
+				f = {x:i * size, y: (headSize/2), width: size, height: (headSize/2)};
 				this._dayNameViews[i].set('frame', f);
 			}
 			
@@ -105,7 +119,7 @@ SCal.CalendarMonthView = SC.View.extend(
 			for(i = 0; i < this._weekViewPool.length; i++){
 				//reframe the days
 				var week = this._weekViewPool[i];
-				f = { x: 1, y: (2 * size) + size * i, width: size * SCal.ONE_WEEK_DAYS, height: size };
+				f = { x: 1, y: headSize + size * i, width: size * SCal.ONE_WEEK_DAYS, height: size };
 				week.viewFrameWillChange() ;
 				week.set('frame', f);
 				week.viewFrameDidChange() ;
@@ -116,14 +130,14 @@ SCal.CalendarMonthView = SC.View.extend(
 
 			f = this.get('frame');
 			f.width = size * SCal.ONE_WEEK_DAYS + 2;
-			f.height = size * (this._weekViewPool.length + 2) + 2;
+			f.height = size * (this._weekViewPool.length) + headSize + 1;
 			this.set('frame', f);
 		
 			this.viewFrameDidChange() ;
 		
 			this._needsReframe, false;
 		}
-	}.observes('daySize'),
+	}.observes('daySize', 'headSize'),
 	
 	_updateWeeks : function() {
 		var monthStart = this.get('monthStart');
@@ -134,7 +148,7 @@ SCal.CalendarMonthView = SC.View.extend(
 		var weekView = this.get('weekView') ? this.get('weekView') : SCal.CalendarWeekView;
 		
 		//update month name
-		this._monthNameView.set('value', monthStart.format("MMM"));
+		this._monthNameView.set('value', monthStart.format("MMM yyyy"));
 		
 		var i = 0;
 		while( true ){

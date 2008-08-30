@@ -25,7 +25,7 @@ SCal.CalendarWeekView = SC.View.extend(
 	/*
 	Height and width of one day
 	*/
-	daySize: 20,
+	daySize: 26,
 	
 	/*
 	Default view used for the day, much like exampleView in the ListView

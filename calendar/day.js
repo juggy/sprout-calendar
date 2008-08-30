@@ -18,7 +18,7 @@ SCal.ONE_DAY = 86400000; //in millisecond
 SCal.CalendarDayView = SC.View.extend( SC.Control,
 /** @scope SCal.CalendarDayView.prototype */ {
 
-  emptyElement: '<div class="calendar-day"></div>',
+  emptyElement: '<a class="calendar-day" href="javascript:;"></a>',
 	
 	/*
 	The current month showing
