@@ -26,11 +26,6 @@ SCal.CalendarWeekView = SC.View.extend( SC.Control,
 	*/
 	daySize: 26,
 	
-	/*
-	Default view used for the day, much like exampleView in the ListView
-	*/
-	dayView: SCal.CalendarDayView,
-	
 	monthWeek: -1,
 	/*
 	The current month showing
@@ -89,11 +84,10 @@ SCal.CalendarWeekView = SC.View.extend( SC.Control,
 	_updateDays : function() {
 		var view;
 		var weekStart = this.get('weekStart');
-		var dayView = this.get('dayView') ? this.get('dayView') : SCal.CalendarDayView;
 		for(var i = 0; i < SCal.ONE_WEEK_DAYS; i++){
 			view =  (this._dayViewPool.length > i) 
 								? this._dayViewPool[i]
-								: dayView.create({owner: this, displayDelegate: this });
+								: this.invokeDelegateMethod(this.displayDelegate, "createDayViewDelegate");
 			this.appendChild(view);
 			
 			view.set('currentMonth', this.get('currentMonth'));
@@ -103,6 +97,11 @@ SCal.CalendarWeekView = SC.View.extend( SC.Control,
 		}
 		
 		this.reframe();
-	}.observes('content')
+	}.observes('content'),
+	
+	//Delegate support
+	createDayViewDelegate : function(){
+		return SCal.CalendarDayView.create({owner: this, displayDelegate: this.displayDelegate });
+	}
 	
 }) ;

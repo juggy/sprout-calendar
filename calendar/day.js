@@ -15,7 +15,7 @@ require('core');
 
 SCal.ONE_DAY = 86400000; //in millisecond
 
-SCal.CalendarDayView = SC.View.extend( SC.Control,
+SCal.CalendarDayView = SC.View.extend( SC.Control, SC.DelegateSupport,
 /** @scope SCal.CalendarDayView.prototype */ {
 
   emptyElement: '<a class="calendar-day" href="javascript:;"></a>',
@@ -56,7 +56,21 @@ SCal.CalendarDayView = SC.View.extend( SC.Control,
 	},
 	
 	_render: function(){
+		this.invokeDelegateMethod(this.displayDelegate, "willRenderDay");
     this.set('innerHTML', this.get('content').getDate());
-	}.observes('content')
+		this.invokeDelegateMethod(this.displayDelegate, "didRenderDay");
+	}.observes('content'),
 	
+	
+	//Delegate support	
+	/*
+	Can be used to change the class names based on date
+	*/
+	willRenderDay : function(dayView, date){
+		//do nothing
+	},
+	
+	didRenderDay : function(dayView, date){
+		//do nothing
+	}
 }) ;
